@@ -26,8 +26,8 @@ our $brokenJobFile = '/tmp/jenkins_last_broken_project.txt';
 our $lastStatusFile = '/tmp/jenkins_last_status.txt';
 
 # -1000 should angle the flag down, 1000 should angle it up
-our $BAD_STATUS = -1000;
-our $GOOD_STATUS = 1000;
+our $badStatus = -1000;
+our $goodStatus = 1000;
 
 our $baseUri = URI->new($baseUrl);
 
@@ -37,7 +37,7 @@ sub getResponsibleUserForBuild {
     my $buildXml = get($baseUri->scheme . '://' . $baseUri->authority . URI->new($build)->path . '/api/xml');
 
     $buildXml =~ /<(?:userName|fullName)>(?<fixedUser>[^<]+)<\/(?:userName|fullName)>/s;
-
+    
     my $user = $+{fixedUser} || 'someone';
 
     # massage the user name for TTS
@@ -49,25 +49,22 @@ sub getLastFailedBuildForJob {
     my $jobXml = get($baseUri->scheme . '://' . $baseUri->authority . URI->new($job)->path . '/api/xml');
 
     $jobXml =~ /<url>(?<brokenBuild>[^<]+)<\/url><\/build>/s;
-
     return $+{brokenBuild};
 }
 
 sub getLastSuccessfulBuildForJob {
+
     my $job = shift;
     my $jobXml = get($baseUri->scheme . '://' . $baseUri->authority . URI->new($job)->path . '/api/xml');
 
-    $jobXml =~ /<lastSuccessfulBuild>.*?<url>(?<fixedBuild>[^<]+)<\/url>[^<]*?<\/lastSuccessfulBuild>/s;
-    
+    $jobXml =~ /<lastSuccessfulBuild>.*?<url>(?<fixedBuild>[^<]+)<\/url>[^<]*?<\/lastSuccessfulBuild>/s;    
     return $+{fixedBuild};
 }
 
 sub getLastBrokenJob {
 
     my $xml = get("$baseUrl/api/xml");
-
     $xml =~ /<url>(?<brokenJob>[^<]+)<\/url><color>[ry]/s;
-    
     return $+{brokenJob};
 }
 
@@ -76,17 +73,13 @@ sub getJobName {
     my $jobXml = get($baseUri->scheme . '://' . $baseUri->authority . URI->new($job)->path . '/api/xml');
     
     $jobXml =~ /<displayName>(?<jobName>[^<]+)<\/displayName>/s;
-    
-    my $jobName = $+{jobName};
+    return $+{jobName};
 }
 
 sub praiseUser {
     my $job = read_file($brokenJobFile) or die 'cannot open last broken job file';
-    
     my $fixedBuild = getLastSuccessfulBuildForJob($job) or die "cannot find last build for job $job";
-    
-    my $user = getResponsibleUserForBuild($fixedBuild);
-    
+    my $user = getResponsibleUserForBuild($fixedBuild);   
     my $jobName = getJobName($job);
     
     #speak via Android TTS
@@ -116,21 +109,21 @@ sub blameUser {
 
 }
 
-my $oldStatus = read_file($lastStatusFile, err_mode => 'quiet') || $BAD_STATUS;
+my $oldStatus = read_file($lastStatusFile, err_mode => 'quiet') || $badStatus;
 
 my $xml = get("$baseUrl/api/xml");
-my $angle=($xml=~/<color>[ry]/)?$BAD_STATUS:$GOOD_STATUS;  
+my $angle=($xml=~/<color>[ry]/)?$badStatus:$goodStatus;  
 my $cmd=dirname($0) . "/flagit 1 $angle";
 system $cmd;
 
 system "echo $angle > $lastStatusFile";
 
 #play some music and speak, if the status changed
-if ($oldStatus != $BAD_STATUS && $angle == $BAD_STATUS) {
+if ($oldStatus != $badStatus && $angle == $badStatus) {
         #bad status change
         system dirname($0).'/play_imperial_march.sh';
         blameUser();
-} elsif ($oldStatus == $BAD_STATUS && $angle != $BAD_STATUS) {
+} elsif ($oldStatus == $badStatus && $angle != $badStatus) {
         #good status change
         system dirname($0).'/play_star_wars_theme.sh';
         praiseUser();
