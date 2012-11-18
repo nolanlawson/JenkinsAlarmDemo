@@ -13,7 +13,7 @@ use File::Slurp;
 use URI;
 
 # your jenkins URL, with credentials if required
-our $baseUrl = 'http://username:password@mysite.com/jenkins';
+our $jenkinsBaseUrl = 'http://username:password@mysite.com/jenkins';
 
 # optional map of user names to the string that the text-to-speech app should speak,
 # useful for when the TTS typically mangles someone's name
@@ -29,13 +29,13 @@ our $lastStatusFile = '/tmp/jenkins_last_status.txt';
 our $badStatus = -1000;
 our $goodStatus = 1000;
 
-our $baseUri = URI->new($baseUrl);
+our $baseUri = URI->new($jenkinsBaseUrl);
 
 sub getResponsibleUserForBuild {
+
     my $build = shift;
     
     my $buildXml = get($baseUri->scheme . '://' . $baseUri->authority . URI->new($build)->path . '/api/xml');
-
     $buildXml =~ /<(?:userName|fullName)>(?<fixedUser>[^<]+)<\/(?:userName|fullName)>/s;
     
     my $user = $+{fixedUser} || 'someone';
@@ -45,6 +45,7 @@ sub getResponsibleUserForBuild {
 }
 
 sub getLastFailedBuildForJob {
+
     my $job = shift;
     my $jobXml = get($baseUri->scheme . '://' . $baseUri->authority . URI->new($job)->path . '/api/xml');
 
@@ -63,12 +64,13 @@ sub getLastSuccessfulBuildForJob {
 
 sub getLastBrokenJob {
 
-    my $xml = get("$baseUrl/api/xml");
+    my $xml = get("$jenkinsBaseUrl/api/xml");
     $xml =~ /<url>(?<brokenJob>[^<]+)<\/url><color>[ry]/s;
     return $+{brokenJob};
 }
 
 sub getJobName {
+
     my $job = shift;
     my $jobXml = get($baseUri->scheme . '://' . $baseUri->authority . URI->new($job)->path . '/api/xml');
     
@@ -77,6 +79,7 @@ sub getJobName {
 }
 
 sub praiseUser {
+
     my $job = read_file($brokenJobFile) or die 'cannot open last broken job file';
     my $fixedBuild = getLastSuccessfulBuildForJob($job) or die "cannot find last build for job $job";
     my $user = getResponsibleUserForBuild($fixedBuild);   
@@ -111,7 +114,7 @@ sub blameUser {
 
 my $oldStatus = read_file($lastStatusFile, err_mode => 'quiet') || $badStatus;
 
-my $xml = get("$baseUrl/api/xml");
+my $xml = get("$jenkinsBaseUrl/api/xml") or die "cannot connect to url $jenkinsBaseUrl";
 my $angle=($xml=~/<color>[ry]/)?$badStatus:$goodStatus;  
 my $cmd=dirname($0) . "/flagit 1 $angle";
 system $cmd;
