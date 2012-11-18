@@ -1,7 +1,7 @@
 Jenkins Alarm Demo
 ==================
 
-Demo of a simple script that checks if any Jenkins build is broken.  If it is, the script raises a Yocto-Servo flag, plays some beep music, and sends some text to an Android device using the SimpleTalker app.
+Demo of a simple script that checks if any Jenkins build is broken.  If it is, the script raises a physical flag, plays some beep music, and sends some text to be spoken aloud from an Android device.
 
 Full explanation in this blog post: [Make your workplace more fun with a Jenkins alarm system][4]
 
@@ -34,7 +34,11 @@ For the Android-powered text-to-speech, you'll need my [SimpleTalker app][6], th
 Components
 -------------
 
-**jenkins_alarm.pl** is the main script that should be called in a crontab, probably every 5 minutes or so.
+**jenkins_alarm.pl** is the main script that should be called in a crontab, probably every 5 minutes or so, e.g.
+
+```
+*/5 * * * * /my/path/to/jenkins_alarm.pl
+```
 
 **flagit** is an executable that sets the angle on the servo.  Takes two arguments: 1) the servo we're calling (numbered 1-5), and 2) the angle to set (between -1000 and 1000), e.g.
 
