@@ -31,7 +31,7 @@ alsamixer                   # adjust beep volume
 
 For the Android-powered text-to-speech, you'll need my [SimpleTalker app][6], the [Android SDK][7], and an Android device attached via USB.
 
-Components
+Usage
 -------------
 
 **jenkins_alarm.pl** is the main script that should be called in a crontab, probably every 5 minutes or so, e.g.
