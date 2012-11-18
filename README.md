@@ -8,8 +8,8 @@ Full explanation in this blog post: [Make your workplace more fun with a Jenkins
 Developers
 -----------
 
-[Nolan Lawson][2]
-[Alexandre Masselot][3]
+* [Nolan Lawson][2]
+* [Alexandre Masselot][3]
 
 License
 -----------
