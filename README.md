@@ -40,7 +40,9 @@ Usage
 */5 * * * * /my/path/to/jenkins_alarm.pl
 ```
 
-**flagit** is an executable that sets the angle on the servo.  Takes two arguments: 1) the servo we're calling (numbered 1-5), and 2) the angle to set (between -1000 and 1000), e.g.
+**flagit.cpp** is a C++ program that uses the Yoctopuce API to set the angle on the servo.  You should compile it into an executable called **flagit**.
+
+The executable takes two arguments: 1) the servo we're calling (numbered 1-5), and 2) the angle to set (between -1000 and 1000), e.g.
 
 ```
 flagit 1 -1000
